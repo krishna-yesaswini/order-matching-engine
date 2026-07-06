@@ -1,7 +1,10 @@
 package com.kudirellilkrishnayesaswini.engine;
 
 import com.kudirellilkrishnayesaswini.model.Order;
+import com.kudirellilkrishnayesaswini.model.Trade;
 import org.junit.jupiter.api.Test;
+
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -36,4 +39,21 @@ class OrderBookTest {
 
         assertEquals(25500L, book.getBestSellPrice());
     }
+    @Test
+    void buyOrderShouldMatchAgainstRestingSellOrder() {
+        OrderBook book = new OrderBook();
+
+        book.addOrder(new Order(5L, "RELIANCE", Order.Side.SELL, 24800L, 10L, 1L));
+
+        List<Trade> trades = book.addOrder(
+                new Order(9L, "RELIANCE", Order.Side.BUY, 25000L, 15L, 2L));
+
+        assertEquals(1, trades.size());
+        assertEquals(24800L, trades.get(0).price());
+        assertEquals(10L, trades.get(0).quantity());
+        assertEquals(5L, book.getBestBuyPrice() != null ? 5L : 5L);
+        assertNull(book.getBestSellPrice());
+        assertEquals(25000L, book.getBestBuyPrice());
+    }
+
 }
