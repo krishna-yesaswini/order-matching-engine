@@ -4,10 +4,8 @@ WORKDIR /app
 COPY pom.xml .
 COPY core/pom.xml core/pom.xml
 COPY api/pom.xml api/pom.xml
-COPY benchmark/pom.xml benchmark/pom.xml
 COPY core/src core/src
 COPY api/src api/src
-COPY benchmark/src benchmark/src
 RUN mvn clean package -pl api -am -DskipTests
 
 # Stage 2: Run
