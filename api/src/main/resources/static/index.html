@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Order Matching Engine — Live Demo</title>
+    <style>
+        body { font-family: -apple-system, Segoe UI, Roboto, sans-serif; max-width: 720px; margin: 40px auto; padding: 0 20px; background: #0f1115; color: #e6e6e6; }
+        h1 { font-size: 22px; }
+        .card { background: #1a1d24; border-radius: 10px; padding: 20px; margin-bottom: 20px; }
+        label { display: block; margin-top: 10px; font-size: 13px; color: #9aa0a6; }
+        input, select { width: 100%; padding: 8px; margin-top: 4px; border-radius: 6px; border: 1px solid #333; background: #0f1115; color: #fff; box-sizing: border-box; }
+        button { margin-top: 16px; padding: 10px 18px; border: none; border-radius: 6px; background: #4f8cff; color: white; font-weight: 600; cursor: pointer; }
+        button:hover { background: #3a76e0; }
+        pre { background: #0f1115; padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 13px; }
+        .prices { display: flex; gap: 20px; }
+        .price-box { flex: 1; text-align: center; padding: 14px; border-radius: 8px; background: #0f1115; }
+        .buy { color: #4caf50; }
+        .sell { color: #f44336; }
+    </style>
+</head>
+<body>
+
+<h1>📈 Order Matching Engine — Live Demo</h1>
+
+<div class="card">
+    <h3>Submit an Order</h3>
+    <label>Symbol</label>
+    <input id="symbol" value="RELIANCE">
+
+    <label>Side</label>
+    <select id="side">
+        <option value="BUY">BUY</option>
+        <option value="SELL">SELL</option>
+    </select>
+
+    <label>Price (in paise, e.g. 25000 = ₹250.00)</label>
+    <input id="price" type="number" value="25000">
+
+    <label>Quantity</label>
+    <input id="quantity" type="number" value="10">
+
+    <button onclick="submitOrder()">Submit Order</button>
+</div>
+
+<div class="card">
+    <h3>Best Prices</h3>
+    <div class="prices">
+        <div class="price-box"><div>Best Buy</div><div class="buy" id="bestBuy">-</div></div>
+        <div class="price-box"><div>Best Sell</div><div class="sell" id="bestSell">-</div></div>
+    </div>
+</div>
+
+<div class="card">
+    <h3>Trades Executed (last submission)</h3>
+    <pre id="trades">No trades yet.</pre>
+</div>
+
+<script>
+    const API_BASE = window.location.origin + "/api/orders";
+
+    async function submitOrder() {
+      const body = {
+        symbol: document.getElementById("symbol").value,
+        side: document.getElementById("side").value,
+        price: parseInt(document.getElementById("price").value),
+        quantity: parseInt(document.getElementById("quantity").value)
+      };
+
+      const res = await fetch(API_BASE, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body)
+      });
+      const trades = await res.json();
+      document.getElementById("trades").textContent =
+        trades.length ? JSON.stringify(trades, null, 2) : "No match — order added to book.";
+
+      refreshBestPrices();
+    }
+
+    async function refreshBestPrices() {
+      const res = await fetch(API_BASE + "/best-prices");
+      const data = await res.json();
+      document.getElementById("bestBuy").textContent = data.bestBuy ?? "-";
+      document.getElementById("bestSell").textContent = data.bestSell ?? "-";
+    }
+
+    refreshBestPrices();
+</script>
+
+</body>
+</html>
