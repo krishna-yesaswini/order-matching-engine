@@ -20,13 +20,14 @@ import java.util.concurrent.TimeoutException;
 public class DisruptorOrderPipeline {
 
     private final RingBuffer<OrderEvent> ringBuffer;
+    private final OrderBook orderBook;
 
     public DisruptorOrderPipeline() {
-        OrderBook orderBook = new OrderBook();
+        this.orderBook = new OrderBook();
 
         Disruptor<OrderEvent> disruptor = new Disruptor<>(
                 new OrderEventFactory(),
-                1024,                              // ring buffer size, must be power of 2
+                1024,
                 Executors.defaultThreadFactory(),
                 ProducerType.SINGLE,
                 new BlockingWaitStrategy()
@@ -55,5 +56,13 @@ public class DisruptorOrderPipeline {
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             throw new RuntimeException("Order processing failed or timed out", e);
         }
+    }
+
+    public Long getBestBuyPrice() {
+        return orderBook.getBestBuyPrice();
+    }
+
+    public Long getBestSellPrice() {
+        return orderBook.getBestSellPrice();
     }
 }

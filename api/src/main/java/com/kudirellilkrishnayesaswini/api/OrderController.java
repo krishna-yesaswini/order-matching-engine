@@ -34,4 +34,11 @@ public class OrderController {
         );
         return pipeline.submit(order);
     }
+
+    @GetMapping("/best-prices")
+    public BestPrices getBestPrices() {
+        return new BestPrices(pipeline.getBestBuyPrice(), pipeline.getBestSellPrice());
+    }
+
+    public record BestPrices(Long bestBuy, Long bestSell) {}
 }
