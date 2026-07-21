@@ -6,7 +6,6 @@ import com.kudirellilkrishnayesaswini.model.Trade;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
 
 @RestController
 @RequestMapping("/api/orders")
@@ -14,7 +13,6 @@ import java.util.concurrent.atomic.AtomicLong;
 public class OrderController {
 
     private final DisruptorOrderPipeline pipeline;
-    private final AtomicLong idGenerator = new AtomicLong(1);
 
     public OrderController(DisruptorOrderPipeline pipeline) {
         this.pipeline = pipeline;
@@ -25,7 +23,7 @@ public class OrderController {
     @PostMapping
     public List<Trade> submitOrder(@RequestBody OrderRequest request) {
         Order order = new Order(
-                idGenerator.getAndIncrement(),
+                pipeline.nextOrderId(),
                 request.symbol(),
                 Order.Side.valueOf(request.side().toUpperCase()),
                 request.price(),
