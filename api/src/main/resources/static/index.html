@@ -2,36 +2,166 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Order Matching Engine — Live Demo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Order Matching Engine</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
     <style>
-        body { font-family: -apple-system, Segoe UI, Roboto, sans-serif; max-width: 720px; margin: 40px auto; padding: 0 20px; background: #0f1115; color: #e6e6e6; }
-        h1 { font-size: 22px; }
-        .card { background: #1a1d24; border-radius: 10px; padding: 20px; margin-bottom: 20px; }
-        label { display: block; margin-top: 10px; font-size: 13px; color: #9aa0a6; }
-        input, select { width: 100%; padding: 8px; margin-top: 4px; border-radius: 6px; border: 1px solid #333; background: #0f1115; color: #fff; box-sizing: border-box; }
-        button { margin-top: 16px; padding: 10px 18px; border: none; border-radius: 6px; background: #4f8cff; color: white; font-weight: 600; cursor: pointer; }
-        button:hover { background: #3a76e0; }
-        pre { background: #0f1115; padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 13px; }
-        .prices { display: flex; gap: 20px; }
-        .price-box { flex: 1; text-align: center; padding: 14px; border-radius: 8px; background: #0f1115; }
-        .buy { color: #4caf50; }
-        .sell { color: #f44336; }
+        :root {
+          --bg: #0a0b0d;
+          --surface: #14161a;
+          --border: #2a2d33;
+          --white: #e8e8e8;
+          --dim: #6b6f76;
+          --red: #c0392b;
+          --mono: 'IBM Plex Mono', 'Courier New', monospace;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+          font-family: var(--mono);
+          max-width: 720px;
+          margin: 40px auto;
+          padding: 0 20px;
+          background: var(--bg);
+          color: var(--white);
+        }
+
+        h1 {
+          font-size: 18px;
+          font-weight: 600;
+          letter-spacing: 0.02em;
+          color: var(--white);
+          border-bottom: 1px solid var(--border);
+          padding-bottom: 12px;
+        }
+
+        .card {
+          background: var(--surface);
+          border: 1px solid var(--border);
+          padding: 20px;
+          margin-bottom: 20px;
+        }
+
+        .card h3 {
+          margin: 0 0 14px 0;
+          font-size: 12px;
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
+          color: var(--dim);
+          font-weight: 600;
+        }
+
+        label {
+          display: block;
+          margin-top: 12px;
+          font-size: 11px;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          color: var(--dim);
+        }
+
+        input {
+          width: 100%;
+          padding: 8px;
+          margin-top: 4px;
+          border: 1px solid var(--border);
+          background: var(--bg);
+          color: var(--white);
+          font-family: var(--mono);
+          font-size: 13px;
+        }
+        input:focus { outline: none; border-color: var(--dim); }
+        input:disabled { color: var(--dim); }
+
+        .side-toggle {
+          display: flex;
+          gap: 1px;
+          margin-top: 4px;
+          border: 1px solid var(--border);
+        }
+        .side-btn {
+          flex: 1;
+          background: var(--bg);
+          border: none;
+          color: var(--dim);
+          font-family: var(--mono);
+          font-size: 12px;
+          font-weight: 600;
+          padding: 8px 0;
+          cursor: pointer;
+          transition: color 0.15s ease, background 0.15s ease;
+        }
+        .side-btn:hover { color: var(--white); }
+        .side-btn.active[data-side="BUY"] { color: var(--white); background: rgba(255,255,255,0.06); }
+        .side-btn.active[data-side="SELL"] { color: var(--red); background: rgba(192,57,43,0.1); }
+
+        .submit-row { margin-top: 16px; }
+
+        .submit-btn {
+          width: 100%;
+          background: var(--surface);
+          border: 1px solid var(--border);
+          color: var(--white);
+          padding: 9px 0;
+          font-family: var(--mono);
+          font-size: 12px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: border-color 0.15s ease, background 0.15s ease;
+        }
+        .submit-btn:hover { border-color: var(--dim); }
+        .submit-btn[data-side="SELL"] { color: var(--red); }
+        .submit-btn:disabled { cursor: default; opacity: 0.7; }
+        .submit-btn.pending { border-color: var(--dim); }
+        .submit-btn.confirmed[data-side="BUY"] { border-color: var(--white); background: rgba(255,255,255,0.05); }
+        .submit-btn.confirmed[data-side="SELL"] { border-color: var(--red); background: rgba(192,57,43,0.08); }
+
+        .status {
+          margin-top: 10px;
+          font-size: 12px;
+          min-height: 14px;
+          transition: color 0.15s ease;
+        }
+        .status.pending { color: var(--dim); }
+        .status.filled { color: var(--white); }
+        .status.queued { color: var(--dim); }
+        .status.failed { color: var(--red); }
+
+        .prices { display: flex; gap: 1px; background: var(--border); }
+        .price-box { flex: 1; text-align: center; padding: 14px; background: var(--surface); }
+        .price-box div:first-child { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--dim); margin-bottom: 6px; }
+        .price-box .value { font-size: 18px; font-weight: 600; }
+        .price-box.buy .value { color: var(--white); }
+        .price-box.sell .value { color: var(--red); }
+
+        pre {
+          background: var(--bg);
+          border: 1px solid var(--border);
+          padding: 12px;
+          overflow-x: auto;
+          font-size: 12px;
+          font-family: var(--mono);
+          color: var(--dim);
+          margin: 0;
+        }
     </style>
 </head>
 <body>
 
-<h1>📈 Order Matching Engine — Live Demo</h1>
+<h1>Order Matching Engine</h1>
 
 <div class="card">
     <h3>Submit an Order</h3>
     <label>Symbol</label>
-    <input id="symbol" value="RELIANCE">
+    <input id="symbol" value="RELIANCE" disabled>
 
     <label>Side</label>
-    <select id="side">
-        <option value="BUY">BUY</option>
-        <option value="SELL">SELL</option>
-    </select>
+    <div class="side-toggle">
+        <button type="button" class="side-btn active" data-side="BUY" onclick="setSide('BUY')">BUY</button>
+        <button type="button" class="side-btn" data-side="SELL" onclick="setSide('SELL')">SELL</button>
+    </div>
 
     <label>Price (in paise, e.g. 25000 = ₹250.00)</label>
     <input id="price" type="number" value="25000">
@@ -39,14 +169,17 @@
     <label>Quantity</label>
     <input id="quantity" type="number" value="10">
 
-    <button onclick="submitOrder()">Submit Order</button>
+    <div class="submit-row">
+        <button id="submitBtn" class="submit-btn" data-side="BUY" onclick="submitOrder()">Submit Buy Order</button>
+    </div>
+    <div id="statusMsg" class="status"></div>
 </div>
 
 <div class="card">
     <h3>Best Prices</h3>
     <div class="prices">
-        <div class="price-box"><div>Best Buy</div><div class="buy" id="bestBuy">-</div></div>
-        <div class="price-box"><div>Best Sell</div><div class="sell" id="bestSell">-</div></div>
+        <div class="price-box buy"><div>Best Buy</div><div class="value" id="bestBuy">-</div></div>
+        <div class="price-box sell"><div>Best Sell</div><div class="value" id="bestSell">-</div></div>
     </div>
 </div>
 
@@ -57,25 +190,79 @@
 
 <script>
     const API_BASE = window.location.origin + "/api/orders";
+    let currentSide = "BUY";
+
+    function setSide(side) {
+      currentSide = side;
+      document.querySelectorAll(".side-btn").forEach(b => b.classList.toggle("active", b.dataset.side === side));
+
+      const btn = document.getElementById("submitBtn");
+      btn.dataset.side = side;
+      btn.textContent = "Submit " + (side === "BUY" ? "Buy" : "Sell") + " Order";
+    }
 
     async function submitOrder() {
       const body = {
-        symbol: document.getElementById("symbol").value,
-        side: document.getElementById("side").value,
+        symbol: "RELIANCE",
+        side: currentSide,
         price: parseInt(document.getElementById("price").value),
         quantity: parseInt(document.getElementById("quantity").value)
       };
 
-      const res = await fetch(API_BASE, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body)
-      });
-      const trades = await res.json();
-      document.getElementById("trades").textContent =
-        trades.length ? JSON.stringify(trades, null, 2) : "No match — order added to book.";
+      const btn = document.getElementById("submitBtn");
+      const statusEl = document.getElementById("statusMsg");
+      const originalLabel = "Submit " + (currentSide === "BUY" ? "Buy" : "Sell") + " Order";
 
-      refreshBestPrices();
+      btn.disabled = true;
+      btn.classList.remove("confirmed");
+      btn.classList.add("pending");
+      btn.textContent = "Submitting...";
+      statusEl.className = "status pending";
+      statusEl.textContent = "Submitting order...";
+
+      try {
+        const res = await fetch(API_BASE, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body)
+        });
+
+        if (!res.ok) {
+          throw new Error("HTTP " + res.status);
+        }
+
+        const trades = await res.json();
+        const noMatch = trades.length === 0;
+
+        document.getElementById("trades").textContent =
+          noMatch ? "No match — order added to book." : JSON.stringify(trades, null, 2);
+
+        btn.classList.remove("pending");
+        btn.classList.add("confirmed");
+
+        if (noMatch) {
+          statusEl.className = "status queued";
+          statusEl.textContent = "Queued — no match, resting on book.";
+          btn.textContent = "Queued";
+        } else {
+          statusEl.className = "status filled";
+          statusEl.textContent = "Filled — " + trades.length + " trade" + (trades.length === 1 ? "" : "s") + " executed.";
+          btn.textContent = "Filled (" + trades.length + ")";
+        }
+
+        refreshBestPrices();
+      } catch (err) {
+        btn.classList.remove("pending", "confirmed");
+        statusEl.className = "status failed";
+        statusEl.textContent = "Failed — " + err.message;
+        btn.textContent = "Failed";
+      } finally {
+        setTimeout(() => {
+          btn.disabled = false;
+          btn.classList.remove("pending", "confirmed");
+          btn.textContent = originalLabel;
+        }, 1500);
+      }
     }
 
     async function refreshBestPrices() {
